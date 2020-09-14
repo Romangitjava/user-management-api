@@ -2,13 +2,9 @@ package com.example.rolemanagement.controller;
 
 import com.example.rolemanagement.entity.User;
 import com.example.rolemanagement.entity.Views;
-import com.example.rolemanagement.repository.UserRepository;
+import com.example.rolemanagement.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.springframework.beans.BeanUtils;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -17,38 +13,35 @@ import java.util.List;
 @RequestMapping("users")
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserServiceImpl userService;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserServiceImpl userService) {
+        this.userService = userService;
     }
 
     @GetMapping
     @JsonView(Views.UserEntity.class)
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping(value = "{id}")
-    public User getOne(@PathVariable("id") Long id) {
-        return userRepository.findById(id)
-              .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public User getUser(@PathVariable("id") Long id) {
+        return userService.getUserById(id);
     }
 
     @PostMapping
-    public User add(@RequestBody @Valid  User user) {
-        return userRepository.save(user);
+    public User addUser(@RequestBody @Valid  User user) {
+        return userService.addUser(user);
     }
 
     @PutMapping(value = "{id}")
-    public User edit(@PathVariable("id") User userFromDb, @RequestBody @Valid  User user) {
-        BeanUtils.copyProperties(user, userFromDb, "id");
-        return userRepository.save(userFromDb);
+    public User editUser(@PathVariable("id") Long id, @RequestBody @Valid  User user) {
+       return userService.editUser(id, user);
     }
 
     @DeleteMapping(value = "{id}")
-    public void delete(@PathVariable("id") User user) {
-        if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        userRepository.delete(user);
+    public void deleteUser(@PathVariable("id") Long id) {
+        userService.deleteUser(id);
     }
 }
